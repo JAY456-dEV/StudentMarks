@@ -29,6 +29,11 @@ app.post("/create-student", async (req: any, res: any) => {
       return res.status(400).json({ error: "Invalid input data" });
     }
 
+    const existingStudent = await Student.findOne({ rollNumber });
+    if (existingStudent) {
+      return res.status(400).json({ error: "Roll number already exists" });
+    }
+
     const newStudent = await Student.create({
       studentName: name,
       age,
@@ -54,15 +59,22 @@ app.post("/add-marks", async (req, res) => {
     }
 
     const student = await Student.findById(studentId);
-    const subject = await Subject.findById(subjectId);
+    const subject = await Subject.findOne({ subjectId });
 
     if (!student || !subject) {
       return res.status(404).json({ error: "Student or subject not found" });
     }
 
+    const existingMark = await Mark.findOne({ studentId, subjectId: subject._id });
+    if (existingMark) {
+      existingMark.marks = marks;
+      await existingMark.save();
+      return res.status(200).json({ message: "Marks updated", data: existingMark });
+    }
+
     const newMark = await Mark.create({
       studentId,
-      subjectId,
+      subjectId: subject._id,
       marks,
     });
 
@@ -79,6 +91,11 @@ app.post("/add-subject", async (req: any, res: any) => {
 
     if (!subjectId || !name) {
       return res.status(400).json({ error: "Invalid input data" });
+    }
+
+    const existingSubject = await Subject.findOne({ subjectId });
+    if (existingSubject) {
+      return res.status(400).json({ error: "Subject ID already exists" });
     }
 
     const subject = await Subject.create({ subjectId, name });
@@ -155,11 +172,17 @@ app.get("/students", async (req, res) => {
           class: 1,
           rollNumber: 1,
           subjects: {
-            $filter: {
-              input: "$subjects",
-              as: "subject",
-              cond: { $ne: ["$$subject.subjectName", null] },
-            },
+            $cond: {
+              if: { $eq: [{ $size: "$subjects" }, 1] },
+              then: {
+                $cond: {
+                  if: { $eq: [{ $arrayElemAt: ["$subjects.subjectName", 0] }, null] },
+                  then: [],
+                  else: "$subjects"
+                }
+              },
+              else: "$subjects"
+            }
           },
           averageMarks: {
             $cond: {
