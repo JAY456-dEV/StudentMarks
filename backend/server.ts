@@ -1,6 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
-import mongoose, { mongo } from "mongoose";
+import mongoose from "mongoose";
 import { Student } from "./models/Student";
 import { Subject } from "./models/Subject";
 import { Mark } from "./models/Mark";
@@ -49,6 +49,17 @@ app.post("/add-marks", async (req, res) => {
   try {
     const { studentId, subjectId, marks } = req.body;
 
+    if (!studentId || !subjectId || typeof marks !== "number") {
+      return res.status(400).json({ error: "Invalid input data" });
+    }
+
+    const student = await Student.findById(studentId);
+    const subject = await Subject.findById(subjectId);
+
+    if (!student || !subject) {
+      return res.status(404).json({ error: "Student or subject not found" });
+    }
+
     const newMark = await Mark.create({
       studentId,
       subjectId,
@@ -66,6 +77,10 @@ app.post("/add-subject", async (req: any, res: any) => {
   try {
     const { subjectId, name }: { subjectId: string; name: string } = req.body;
 
+    if (!subjectId || !name) {
+      return res.status(400).json({ error: "Invalid input data" });
+    }
+
     const subject = await Subject.create({ subjectId, name });
 
     res.status(201).json({ message: "Subject created", subject });
@@ -77,7 +92,7 @@ app.post("/add-subject", async (req: any, res: any) => {
 
 app.get("/all-subjects", async (req, res) => {
   try {
-    const subjects = await Subject.find(); // Mongoose uses find() to get all documents
+    const subjects = await Subject.find();
     res.status(200).json(subjects);
   } catch (error) {
     console.error("Error fetching subjects:", error);
@@ -88,7 +103,6 @@ app.get("/all-subjects", async (req, res) => {
 app.get("/students", async (req, res) => {
   try {
     const students = await Student.aggregate([
-      // Left join with Marks
       {
         $lookup: {
           from: "marks",
@@ -97,7 +111,6 @@ app.get("/students", async (req, res) => {
           as: "marks",
         },
       },
-      // Lookup subject for each mark
       {
         $unwind: {
           path: "$marks",
@@ -118,13 +131,13 @@ app.get("/students", async (req, res) => {
           preserveNullAndEmptyArrays: true,
         },
       },
-      // Group back by student
       {
         $group: {
           _id: "$_id",
           studentName: { $first: "$studentName" },
           age: { $first: "$age" },
           class: { $first: "$class" },
+          rollNumber: { $first: "$rollNumber" },
           subjects: {
             $push: {
               subjectName: "$marks.subject.name",
@@ -140,11 +153,12 @@ app.get("/students", async (req, res) => {
           name: "$studentName",
           age: 1,
           class: 1,
+          rollNumber: 1,
           subjects: {
             $filter: {
               input: "$subjects",
               as: "subject",
-              cond: { $ne: ["$$subject.subjectName", null] }, // Filter nulls
+              cond: { $ne: ["$$subject.subjectName", null] },
             },
           },
           averageMarks: {
