@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { getSubjects } from "../utils/studentsApiCall/getSubjects";
-import type { Mark, Student, StudentWithMarks, Subject } from "../types";
+import type { Mark, StudentWithMarks, Subject } from "../types";
 
 interface MarksFormProps {
   onSuccess: (mark: Mark) => void;
@@ -13,9 +13,8 @@ const MarksForm: React.FC<MarksFormProps> = ({
   onSuccess,
   studentsWithMarks,
 }) => {
-  const [students, setStudents] = useState<Student[]>([]);
+  const [students, setStudents] = useState<StudentWithMarks[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
-  const [existingMarks, setExistingMarks] = useState<Mark[]>([]);
 
   useEffect(() => {
     setStudents(studentsWithMarks);
@@ -46,7 +45,7 @@ const MarksForm: React.FC<MarksFormProps> = ({
       marks: "",
     },
     validationSchema,
-    onSubmit: async (values, { resetForm, setSubmitting, setFieldError }) => {
+    onSubmit: async (values, { resetForm, setSubmitting }) => {
       try {
         const response = await fetch("http://localhost:8000/add-marks", {
           method: "POST",
@@ -61,8 +60,7 @@ const MarksForm: React.FC<MarksFormProps> = ({
         });
         
         const data = await response.json();
-        console.log(data,"adddemarak")
-        // onSuccess(newMark);
+        onSuccess(data.data);
         resetForm();
       } catch (error) {
         console.error("Error adding marks:", error);
@@ -96,7 +94,7 @@ const MarksForm: React.FC<MarksFormProps> = ({
         >
           <option value="">Select a student</option>
           {students.map((student) => (
-            <option key={student._id} value={student._id}>
+            <option key={student.studentId} value={student.studentId}>
               {student.name} ({student.rollNumber})
             </option>
           ))}
@@ -128,7 +126,7 @@ const MarksForm: React.FC<MarksFormProps> = ({
         >
           <option value="">Select a subject</option>
           {subjects.map((subject) => (
-            <option key={subject.id} value={subject.id}>
+            <option key={subject.subjectId} value={subject.subjectId}>
               {subject.name}
             </option>
           ))}

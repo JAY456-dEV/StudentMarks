@@ -8,13 +8,13 @@ export interface Student {
 }
 
 export interface Subject {
-  id: string;
+  _id: string;
+  subjectId: string;
   name: string;
-  code: string;
 }
 
 export interface Mark {
-  id: string;
+  _id: string;
   studentId: string;
   subjectId: string;
   marks: number;

@@ -13,42 +13,10 @@ const StudentsList: React.FC<{ studentsWithMarks: StudentWithMarks[] }> = ({
   const studentModal = useModal();
   const marksModal = useModal();
 
-  // useEffect(() => {
-  //   loadStudentsWithMarks();
-  // }, []);
-
-  // const loadStudentsWithMarks = () => {
-  //   const students = getStudents();
-  //   const marks = getMarks();
-  //   const subjects = getSubjects();
-
-  //   const enhanced = students.map((student) => {
-  //     const studentMarks = marks.filter(
-  //       (mark) => mark.studentId === student.id
-  //     );
-
-  //     const marksWithDetails = studentMarks.map((mark) => {
-  //       const subject = subjects.find((s) => s.id === mark.subjectId);
-  //       return {
-  //         subjectId: mark.subjectId,
-  //         subjectName: subject ? subject.name : "Unknown Subject",
-  //         marks: mark.marks,
-  //       };
-  //     });
-
-  //     return {
-  //       ...student,
-  //       marks: marksWithDetails,
-  //       averageMark: calculateAverageMarks(student.id),
-  //     };
-  //   });
-
-  //   setStudentsWithMarks(enhanced);
-  // };
-
   const handleSuccess = () => {
     studentModal.closeModal();
     marksModal.closeModal();
+    window.location.reload();
   };
 
   const filteredStudents = studentsWithMarks.filter(
