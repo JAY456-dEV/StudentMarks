@@ -15,7 +15,6 @@ const MarksForm: React.FC<MarksFormProps> = ({
 }) => {
   const [students, setStudents] = useState<StudentWithMarks[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
-  const [error, setError] = useState<string>("");
 
   useEffect(() => {
     setStudents(studentsWithMarks);
@@ -61,17 +60,10 @@ const MarksForm: React.FC<MarksFormProps> = ({
         });
         
         const data = await response.json();
-        
-        if (!response.ok) {
-          throw new Error(data.error || 'Failed to add marks');
-        }
-        
         onSuccess(data.data);
         resetForm();
-        setError("");
       } catch (error) {
         console.error("Error adding marks:", error);
-        setError(error instanceof Error ? error.message : "Failed to add marks");
       } finally {
         setSubmitting(false);
       }
@@ -80,12 +72,6 @@ const MarksForm: React.FC<MarksFormProps> = ({
 
   return (
     <form onSubmit={formik.handleSubmit} className="space-y-4">
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md mb-4">
-          {error}
-        </div>
-      )}
-      
       <div className="mb-4">
         <label
           htmlFor="studentId"
@@ -140,7 +126,7 @@ const MarksForm: React.FC<MarksFormProps> = ({
         >
           <option value="">Select a subject</option>
           {subjects.map((subject) => (
-            <option key={subject._id} value={subject.subjectId}>
+            <option key={subject.subjectId} value={subject.subjectId}>
               {subject.name}
             </option>
           ))}
