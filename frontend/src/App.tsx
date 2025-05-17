@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import StudentsList from "./components/StudentsList";
 import type { StudentWithMarks } from "./types";
-
 
 function App() {
   const [studentsWithMarks, setStudentsWithMarks] = useState<
@@ -9,7 +8,7 @@ function App() {
   >([]);
 
   async function getStudentsMarks() {
-    const response = await fetch("http://localhost:8000/students", {
+    const response = await fetch("http://localhost:7000/students/get-students", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -26,7 +25,11 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <StudentsList studentsWithMarks={studentsWithMarks} />
+      <StudentsList
+        studentsWithMarks={studentsWithMarks}
+        setStudentsWithMarks={setStudentsWithMarks}
+        getStudentsMarks={getStudentsMarks}
+      />
     </div>
   );
 }

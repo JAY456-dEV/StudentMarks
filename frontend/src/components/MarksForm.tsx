@@ -17,7 +17,9 @@ const MarksForm: React.FC<MarksFormProps> = ({
   const [subjects, setSubjects] = useState<Subject[]>([]);
 
   useEffect(() => {
-    setStudents(studentsWithMarks);
+    if (studentsWithMarks && studentsWithMarks.length > 0) {
+      setStudents(studentsWithMarks);
+    }
   }, [studentsWithMarks]);
 
   async function handleGetSubject() {
@@ -47,7 +49,7 @@ const MarksForm: React.FC<MarksFormProps> = ({
     validationSchema,
     onSubmit: async (values, { resetForm, setSubmitting }) => {
       try {
-        const response = await fetch("http://localhost:8000/add-marks", {
+        const response = await fetch("http://localhost:7000/marks/add-marks", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -58,9 +60,9 @@ const MarksForm: React.FC<MarksFormProps> = ({
             marks: Number(values.marks),
           }),
         });
-        
+
         const data = await response.json();
-        onSuccess(data.data);
+        onSuccess(data);
         resetForm();
       } catch (error) {
         console.error("Error adding marks:", error);
@@ -94,7 +96,7 @@ const MarksForm: React.FC<MarksFormProps> = ({
         >
           <option value="">Select a student</option>
           {students.map((student) => (
-            <option key={student.studentId} value={student.studentId}>
+            <option key={student._id} value={student._id}>
               {student.name} ({student.rollNumber})
             </option>
           ))}
@@ -126,7 +128,7 @@ const MarksForm: React.FC<MarksFormProps> = ({
         >
           <option value="">Select a subject</option>
           {subjects.map((subject) => (
-            <option key={subject.subjectId} value={subject.subjectId}>
+            <option key={subject._id} value={subject._id}>
               {subject.name}
             </option>
           ))}

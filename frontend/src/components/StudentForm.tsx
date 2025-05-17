@@ -12,7 +12,7 @@ const StudentForm: React.FC<StudentFormProps> = ({ onSuccess }) => {
     name: Yup.string()
       .required("Name is required")
       .min(2, "Name must be at least 2 characters"),
-    age: Yup.string().required("age is required"),
+    age: Yup.number().required("age is required"),
     rollNumber: Yup.string()
       .required("Roll number is required")
       .matches(/^[0-9]+$/, "Roll number must contain only digits"),
@@ -29,14 +29,14 @@ const StudentForm: React.FC<StudentFormProps> = ({ onSuccess }) => {
     validationSchema,
     onSubmit: async (values, { resetForm, setSubmitting }) => {
       try {
-        const response = await fetch("http://localhost:8000/create-student", {
+        const response = await fetch("http://localhost:7000/students/create-student", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
             name: values?.name,
-            age: values?.age,
+            age: parseInt(values?.age),
             classNumber: values?.class,
             rollNumber: values?.rollNumber,
           }),
